@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AudioModule } from '@captionator/audio';
+import { Component, Signal, computed } from '@angular/core';
+import { AudioInputService, AudioModule } from '@captionator/audio';
 
 @Component({
   selector: 'captionator-input-device',
@@ -13,8 +13,9 @@ import { AudioModule } from '@captionator/audio';
   styleUrls: ['./input-device.component.scss']
 })
 export class InputDeviceComponent {
-  public selectedInput = signal('mic');
-  constructor() {
+  public selectedInput: Signal<string>;
+  constructor(private inputService: AudioInputService) {
+    this.selectedInput = computed(() => this.inputService.selectedInput());
     console.log('input device component constructor', this.selectedInput());
   }
 }

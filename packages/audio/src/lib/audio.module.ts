@@ -7,6 +7,8 @@ import { audioRoutes } from './lib.routes';
   imports: [
     CommonModule,
     RouterModule.forChild(audioRoutes),
-  ],
+  ]
 })
-export class AudioModule {}
+export class AudioModule {
+}
+export * from './audio-input/audio-input.service'
