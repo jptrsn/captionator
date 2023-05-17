@@ -1,1 +1,12 @@
-<p>input-device works!</p>
+<div class="input-devices-list">
+  <h1 *ngIf="inputState() as stateMessage">{{stateMessage}}</h1>
+  <h3 *ngIf="access(); else promptForAccess">Microphone access is granted!</h3>
+  <ng-template #promptForAccess>
+    <h3>You have not yet granted microphone access</h3>
+  </ng-template>
+  <ul>
+    <li *ngFor="let device of inputs()">
+      <pre>{{device | json }}</pre>
+    </li>
+  </ul>
+</div>
