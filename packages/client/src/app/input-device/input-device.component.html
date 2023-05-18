@@ -1,9 +1,15 @@
 <div class="input-devices-list">
   <h1 *ngIf="inputState() as stateMessage">{{stateMessage}}</h1>
-  <h3 *ngIf="access(); else promptForAccess">Microphone access is granted!</h3>
+  <ng-container *ngIf="access(); else promptForAccess">
+    <h3>Microphone access is granted!</h3>
+    <button (click)="streamAudio()">Start stream</button>
+    <button (click)="stopStream()">Stop stream</button>
+  </ng-container>
   <ng-template #promptForAccess>
     <h3>You have not yet granted microphone access</h3>
+    <button (click)="streamAudio()">Click here to grant access</button>
   </ng-template>
+  <h2>Input Devices</h2>
   <ul>
     <li *ngFor="let device of inputs()">
       <pre>{{device | json }}</pre>

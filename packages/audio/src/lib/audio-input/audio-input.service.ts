@@ -1,24 +1,21 @@
 import { Injectable, Signal, WritableSignal, computed, signal } from '@angular/core';
-import { Observable, from } from 'rxjs';
+import { Observable, from, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AudioInputService {
 
-  private _deviceInfoList: WritableSignal<MediaDeviceInfo[]>;
+  private _deviceInfoList!: WritableSignal<MediaDeviceInfo[]>;
   constructor() { 
-    console.log('audio input service constructor');
-    this._deviceInfoList = signal<MediaDeviceInfo[]>([]);
     this.listAudioDevices();
   }
 
   public listAudioDevices(): Signal<MediaDeviceInfo[]> {
-    console.log('list audio devices')
-    if (!this._deviceInfoList()?.length) {
-      navigator.mediaDevices.enumerateDevices().then((info: MediaDeviceInfo[]) => {
-        this._deviceInfoList.set(info);
-      });
+    if (!this._deviceInfoList) {
+      this._deviceInfoList = signal<MediaDeviceInfo[]>([]);
+      this._refreshDeviceInfoList();
+      navigator.mediaDevices.addEventListener('deviceChange', () => this._refreshDeviceInfoList())
     }
     return this._deviceInfoList;
   }
@@ -36,7 +33,23 @@ export class AudioInputService {
     return perm;
   }
 
-  public getAudioInputStream(): Observable<MediaStream> {
-    return from(navigator.mediaDevices.getUserMedia({video: false, audio: true}));
+  public getAudioInputStream(deviceId?: string): Observable<MediaStream> {
+    return from(navigator.mediaDevices.getUserMedia({video: false, audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      channelCount: 1,
+      sampleRate: 1600,
+      deviceId
+    } })).pipe(
+      tap(() => {
+        this._refreshDeviceInfoList();
+      })
+    );
+  }
+
+  private _refreshDeviceInfoList(): void {
+    navigator.mediaDevices.enumerateDevices().then((info: MediaDeviceInfo[]) => {
+      this._deviceInfoList.set(info.filter((value) => !!value.deviceId));
+    });
   }
 }

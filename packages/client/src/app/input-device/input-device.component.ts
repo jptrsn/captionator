@@ -19,18 +19,17 @@ export class InputDeviceComponent implements OnInit, OnDestroy {
   public inputs: Signal<MediaDeviceInfo[]>;
   public access: Signal<boolean>;
 
+  private activeStream?: MediaStream;
   private onDestroy$: Subject<void> = new Subject<void>();
   constructor(private inputService: AudioInputService) {
     this.inputState = signal<string | null>(null);
     const inputList: Signal<MediaDeviceInfo[]> = this.inputService.listAudioDevices();
-    // this.inputs  = this.inputService.listAudioDevices();
     this.inputs = computed(() => inputList().filter((info) => (info.kind === 'audioinput' && info.deviceId !== '')));
     this.access = this.inputService.hasAudioPermission({input: true});
   }
   
   ngOnInit(): void {
     console.log('init');
-    // this.streamAudio();
   }
 
   ngOnDestroy(): void {
@@ -45,8 +44,16 @@ export class InputDeviceComponent implements OnInit, OnDestroy {
         this.inputState.set(`Error: ${err.message}`);
         return of(err);
       })
-    ).subscribe((stream) => {
-      console.log('stream', stream);
+    ).subscribe((stream: MediaStream) => {
+      this.activeStream = stream;
+      
     })
+  }
+
+  stopStream() {
+    if (this.activeStream) {
+      this.activeStream.getAudioTracks().forEach((track) => track.stop());
+      delete this.activeStream;
+    }
   }
 }
