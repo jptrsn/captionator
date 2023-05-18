@@ -46,7 +46,20 @@ export class InputDeviceComponent implements OnInit, OnDestroy {
       })
     ).subscribe((stream: MediaStream) => {
       this.activeStream = stream;
-      
+      const recorder = new MediaRecorder(stream);
+      recorder.addEventListener('dataavailable',  (ev: BlobEvent) => {
+        console.log('data available', ev);
+      });
+      recorder.addEventListener('error', (ev: Event) => {
+        console.log('recorder err', ev);
+      })
+      recorder.addEventListener('start', (ev: Event) => {
+        console.log('recorder start', ev);
+      })
+      recorder.addEventListener('stop', (ev: Event) => {
+        console.log('recorder stop', ev);
+      })
+      recorder.start();
     })
   }
 

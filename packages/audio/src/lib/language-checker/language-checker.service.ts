@@ -22,7 +22,9 @@ export class LanguageCheckerService {
     const body: HttpParams = new HttpParams({
       fromObject: {
         text,
-        language: navigator.language || 'auto'
+        language: navigator.language || 'auto',
+        level: 'picky',
+        // disabledRules: 'THE_SENT_END'
       }
     });
     return this.http.post(`${this.baseHref}/v2/check`, body, { headers }) as Observable<LanguageToolCheckResponse>;
@@ -30,13 +32,26 @@ export class LanguageCheckerService {
 
   correct(text: string): Observable<string> {
     return this.check(text).pipe(
-      map((result: LanguageToolCheckResponse) => this._correctResults(text, result))
+      map((result: LanguageToolCheckResponse) => this._correctResults(text, result)),
+      map((text: string) => this.terminate(text))
     )
+  }
+
+  terminate(text: string): string {
+    if (text.match(/[^!"#$%&'()*+,.]$/)) {
+      console.log('appending full stop', text);
+      text += '.';
+    }
+    return text;
   }
 
   private _correctResults(originalText: string, result: LanguageToolCheckResponse): string {
     let response: string = originalText;
     result.matches.forEach((match) => {
+      if (!match.replacements?.length) {
+        console.error('no replacements avaiable for match', match);
+        return;
+      }
       response = response.substring(0, match.offset) + match.replacements[0].value + response.substring(match.offset + match.length);
     });
     return response;

@@ -18,7 +18,7 @@ export class RecognitionComponent implements OnInit, OnDestroy {
   public liveText: WritableSignal<string> = signal('');
   public capturedText: WritableSignal<string> = signal('');
   public correctedFullText: WritableSignal<string> = signal('');
-  private readonly baseHref: string = 'http://192.168.1.13:8081';
+  private readonly baseHref: string = 'http://api.educoder.dev/language';
   private readonly stop$: Subject<void> = new Subject<void>();
   private readonly onDestroy$: Subject<void> = new Subject<void>();
   constructor(private recog: RecognitionService,
@@ -32,7 +32,7 @@ export class RecognitionComponent implements OnInit, OnDestroy {
     this.recog.recognizedText$.pipe(
       takeUntil(this.onDestroy$),
       filter((text) => !!text),
-      switchMap((text: string) => this.checker.correct(text + '.'))
+      switchMap((text: string) => this.checker.correct(text))
     ).subscribe((capturedText: string | undefined) => {
       if (capturedText) {
         this.capturedText.update((str) => {
