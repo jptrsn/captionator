@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Observable, ReplaySubject, Subject, distinctUntilChanged } from 'rxjs';
 declare const webkitSpeechRecognition: any;
 
 @Injectable({
@@ -51,7 +51,6 @@ export class RecognitionService {
 
   stop(): void {
     this.isStoppedSpeechRecog = true;
-    this.recognition.stop();
     this.liveOutput$.complete();
     console.log("End speech recognition")
   }

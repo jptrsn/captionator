@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, WritableSignal, signal } from '@angular/core';
 import { RecognitionService } from '@captionator/audio';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, take, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'captionator-recognition',
@@ -35,6 +35,7 @@ export class RecognitionComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stop$.next();
     this.onDestroy$.next();
   }
 
@@ -43,11 +44,16 @@ export class RecognitionComponent implements OnInit, OnDestroy {
       takeUntil(this.stop$)
     ).subscribe((partialResults: string) => {
       this.liveText.set(partialResults);
+    });
+    this.stop$.pipe(
+      take(1)
+    ).subscribe(() => {
+      this.recog.stop();
+      this.liveText.set('');
     })
   }
 
   stopCapture(): void {
     this.stop$.next();
-    this.recog.stop();
   }
 }
