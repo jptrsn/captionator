@@ -11,4 +11,5 @@ import { audioRoutes } from './lib.routes';
 })
 export class AudioModule {
 }
-export * from './audio-input/audio-input.service'
+export * from './audio-input/audio-input.service';
+export * from './recognition/recognition.service';
