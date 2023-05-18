@@ -13,3 +13,5 @@ export class AudioModule {
 }
 export * from './audio-input/audio-input.service';
 export * from './recognition/recognition.service';
+export * from './language-checker/language-checker.service';
+export * from './language-checker/language-checker.model';

@@ -6,8 +6,9 @@ declare const webkitSpeechRecognition: any;
   providedIn: 'root'
 })
 export class RecognitionService {
-  private liveOutput$: ReplaySubject<string> = new ReplaySubject<string>();
   public recognizedText$: Subject<string> = new Subject<string>;
+  
+  private liveOutput$: ReplaySubject<string> = new ReplaySubject<string>();
   private transcript?: string;
   private isStoppedSpeechRecog: boolean;
   private recognition: any;
@@ -19,7 +20,7 @@ export class RecognitionService {
   init(): void {
 
     this.recognition.interimResults = true;
-    this.recognition.lang = 'en-US';
+    this.recognition.lang = navigator.language;
 
     this.recognition.addEventListener('result', (e: any) => {
       this.transcript = Array.from(e.results)
@@ -34,12 +35,10 @@ export class RecognitionService {
     this.isStoppedSpeechRecog = false;
     this.recognition.start();
     this.recognition.addEventListener('end', () => {
-      console.log('recognition end')
       this.recognizedText$.next(this.transcript as string);
       delete this.transcript;
       if (this.isStoppedSpeechRecog) {
         this.recognition.stop();
-        console.log("End speech recognition")
       } else {
         this.recognition.start();
       }
