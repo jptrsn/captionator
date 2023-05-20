@@ -1,0 +1,12 @@
+<div class="recorder">
+  <button (click)="start()" [disabled]="isRecording()">Start</button>
+  <button (click)="stop()" [disabled]="!isRecording()">Stop</button>
+  {{audioUrl()}}
+  
+    
+  <audio #audioPlayer controls>
+    
+  </audio>
+  
+  
+</div>

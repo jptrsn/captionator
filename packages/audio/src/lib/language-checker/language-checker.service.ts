@@ -38,8 +38,7 @@ export class LanguageCheckerService {
   }
 
   terminate(text: string): string {
-    if (text.match(/[^!"#$%&'()*+,.]$/)) {
-      console.log('appending full stop', text);
+    if (text.match(/[^!?"#$%&'()*+,.]$/)) {
       text += '.';
     }
     return text;

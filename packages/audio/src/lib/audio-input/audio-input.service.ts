@@ -2,21 +2,18 @@ import { Injectable, Signal, WritableSignal, computed, signal } from '@angular/c
 import { Observable, from, tap } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'any'
 })
 export class AudioInputService {
 
-  private _deviceInfoList!: WritableSignal<MediaDeviceInfo[]>;
+  private _deviceInfoList: WritableSignal<MediaDeviceInfo[]>;
   constructor() { 
-    this.listAudioDevices();
+    this._deviceInfoList = signal<MediaDeviceInfo[]>([]);
+    this._refreshDeviceInfoList();
+    navigator.mediaDevices.addEventListener('deviceChange', () => this._refreshDeviceInfoList())
   }
 
   public listAudioDevices(): Signal<MediaDeviceInfo[]> {
-    if (!this._deviceInfoList) {
-      this._deviceInfoList = signal<MediaDeviceInfo[]>([]);
-      this._refreshDeviceInfoList();
-      navigator.mediaDevices.addEventListener('deviceChange', () => this._refreshDeviceInfoList())
-    }
     return this._deviceInfoList;
   }
 
@@ -45,6 +42,11 @@ export class AudioInputService {
         this._refreshDeviceInfoList();
       })
     );
+  }
+
+  public recordAudioStream(stream: MediaStream): MediaRecorder {
+    const recorder = new MediaRecorder(stream);
+    return recorder;
   }
 
   private _refreshDeviceInfoList(): void {

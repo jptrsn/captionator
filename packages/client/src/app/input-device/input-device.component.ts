@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, Signal, WritableSignal, computed, signal } from '@angular/core';
-import { AudioInputService, AudioModule } from '@captionator/audio';
+import { Component, Inject, OnDestroy, OnInit, Signal, WritableSignal, computed, signal } from '@angular/core';
+import { AudioInputService } from '@captionator/audio';
 import { Subject, catchError, of, take } from 'rxjs';
 
 @Component({
@@ -8,8 +8,8 @@ import { Subject, catchError, of, take } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    AudioModule,
   ],
+  providers: [AudioInputService],
   templateUrl: './input-device.component.html',
   styleUrls: ['./input-device.component.scss']
 })
@@ -21,7 +21,7 @@ export class InputDeviceComponent implements OnInit, OnDestroy {
 
   private activeStream?: MediaStream;
   private onDestroy$: Subject<void> = new Subject<void>();
-  constructor(private inputService: AudioInputService) {
+  constructor(@Inject(AudioInputService) private inputService: AudioInputService) {
     this.inputState = signal<string | null>(null);
     const inputList: Signal<MediaDeviceInfo[]> = this.inputService.listAudioDevices();
     this.inputs = computed(() => inputList().filter((info) => (info.kind === 'audioinput' && info.deviceId !== '')));

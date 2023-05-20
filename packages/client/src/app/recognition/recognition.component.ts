@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, WritableSignal, signal } from '@angular/core';
-import { LanguageCheckerService, LanguageToolCheckResponse, RecognitionService } from '@captionator/audio';
-import { Observable, Subject, catchError, filter, map, of, switchMap, take, takeUntil } from 'rxjs';
+import { AudioModule, LanguageCheckerService, RecognitionService } from '@captionator/audio';
+import { Observable, Subject, filter, switchMap, take, takeUntil } from 'rxjs';
 
 
 @Component({
   selector: 'captionator-recognition',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, AudioModule],
   providers: [HttpClientModule],
   templateUrl: './recognition.component.html',
   styleUrls: ['./recognition.component.scss'],
@@ -49,8 +49,7 @@ export class RecognitionComponent implements OnInit, OnDestroy {
   }
 
   startCapture(): void {
-    const liveTextResults$: Observable<string> = this.recog.start();
-    liveTextResults$.pipe(
+    this.recog.start().pipe(
       takeUntil(this.stop$)
     ).subscribe((partialResults: string) => {
       this.liveText.set(partialResults);
@@ -64,6 +63,7 @@ export class RecognitionComponent implements OnInit, OnDestroy {
   }
 
   stopCapture(): void {
+    console.log('stop emitting')
     this.stop$.next();
   }
 }
