@@ -1,6 +1,6 @@
 import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild, WritableSignal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, map, take, takeUntil } from 'rxjs';
+import { Subject, map, take, takeUntil, throttleTime } from 'rxjs';
 import { AudioInputService } from '@captionator/audio';
 
 
@@ -18,6 +18,7 @@ export class RecorderComponent implements OnInit, OnDestroy {
 
   public isRecording: WritableSignal<boolean> = signal(false);
   public audioUrl: WritableSignal<string> = signal('')
+  public volume: WritableSignal<number> = signal(0);
   
   private recordedData$: Subject<Blob> = new Subject<Blob>();
   private stop$: Subject<void> = new Subject<void>();
@@ -29,10 +30,14 @@ export class RecorderComponent implements OnInit, OnDestroy {
     this.recordedData$.pipe(
       takeUntil(this.onDestroy$)
     ).subscribe((data: Blob) => {
-      console.log('got data', this.player);
       const audioURL = URL.createObjectURL(data);
       this.player.nativeElement.src = audioURL;
-      console.log('set audio url', audioURL);
+      this.audioUrl.set(audioURL)
+    });
+    this.inputService.micLevel$.pipe(
+      takeUntil(this.onDestroy$)
+    ).subscribe((volume) => {
+      this.volume.set(volume);
     })
   }
 
@@ -48,8 +53,8 @@ export class RecorderComponent implements OnInit, OnDestroy {
     this.isRecording.set(true);
     this.inputService.getAudioInputStream().pipe(
       take(1),
-      map((stream: MediaStream) => this.inputService.recordAudioStream(stream))
-    ).subscribe((recorder: MediaRecorder) => {
+    ).subscribe((stream: MediaStream) => {
+      const recorder = this.inputService.recordAudioStream(stream)
       this._initRecorder(recorder);
     });
   }
@@ -64,24 +69,35 @@ export class RecorderComponent implements OnInit, OnDestroy {
     let data: Blob[] = [];
     
     recorder.ondataavailable = (ev: BlobEvent) => {
-      console.log('got data chunk', ev.data);
       data.push(ev.data);
     }
 
-    recorder.onstop = (ev: Event) => {
+    recorder.onstop = () => {
       console.log('onstop', data);
-      const blob = new Blob(data, { type: "audio/mp3; codecs=opus" });
-      this.recordedData$.next(blob);
-      data = [];
+      if (data.length) {
+        const blob = new Blob(data, { type: "audio/mp3; codecs=opus" });
+        this.recordedData$.next(blob);
+        data = [];
+      }
     }
     
     recorder.start();
+
+    this.inputService.micLevel$.pipe(
+      takeUntil(this.stop$),
+      throttleTime(250),
+      map((value) => Math.round(value * 100) / 100)
+    ).subscribe((level) => {
+      console.log('level', level);
+      if (level === 0) {
+        recorder.requestData();
+      }
+    })
 
     this.stop$.pipe(
       take(1)
     ).subscribe(() => {
       recorder.stop();
-      
     })
   }
 }
