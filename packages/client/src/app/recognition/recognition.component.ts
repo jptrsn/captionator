@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, WritableSignal, signal } from '@angular/core';
-import { AudioModule, LanguageCheckerService, RecognitionService } from '@captionator/audio';
-import { Observable, Subject, filter, switchMap, take, takeUntil } from 'rxjs';
+import { Component, Inject, OnDestroy, OnInit, WritableSignal, signal } from '@angular/core';
+import { LanguageCheckerService, RecognitionService } from '@captionator/audio';
+import { Subject, filter, switchMap, take, takeUntil } from 'rxjs';
 
 
 @Component({
   selector: 'captionator-recognition',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, AudioModule],
+  imports: [CommonModule, HttpClientModule],
   providers: [HttpClientModule],
   templateUrl: './recognition.component.html',
   styleUrls: ['./recognition.component.scss'],
@@ -21,9 +21,9 @@ export class RecognitionComponent implements OnInit, OnDestroy {
   private readonly baseHref: string = 'http://api.educoder.dev/language';
   private readonly stop$: Subject<void> = new Subject<void>();
   private readonly onDestroy$: Subject<void> = new Subject<void>();
-  constructor(private recog: RecognitionService,
+  constructor(@Inject(RecognitionService) private recog: RecognitionService,
               private http: HttpClient,
-              private checker: LanguageCheckerService) {
+              @Inject(LanguageCheckerService) private checker: LanguageCheckerService) {
   }
 
   ngOnInit(): void {
