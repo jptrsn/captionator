@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@captionator/audio": ["packages/audio/src/index.ts"]
+      "@captionator/audio": ["packages/audio/src/index.ts"],
+      "@captionator/whisper": ["packages/whisper/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

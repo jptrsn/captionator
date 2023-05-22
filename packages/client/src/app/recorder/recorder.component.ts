@@ -2,12 +2,16 @@ import { Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild, WritableSi
 import { CommonModule } from '@angular/common';
 import { Subject, map, take, takeUntil, throttleTime } from 'rxjs';
 import { AudioInputService } from '@captionator/audio';
+import { WhisperModule } from '@captionator/whisper';
 
 
 @Component({
   selector: 'captionator-recorder',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    WhisperModule,
+  ],
   providers: [AudioInputService],
   templateUrl: './recorder.component.html',
   styleUrls: ['./recorder.component.scss'],
