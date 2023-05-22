@@ -5,5 +5,5 @@ import { Injectable } from '@angular/core';
 })
 export class ModelService {
 
-  constructor(private localStorage: LocalStora) { }
+  constructor() { }
 }
